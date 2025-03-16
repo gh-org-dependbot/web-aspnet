@@ -1,0 +1,28 @@
+@page
+@model WebAspnet.Pages.TodoModel
+@{
+    ViewData["Title"] = "Todo List";
+}
+
+<div class="container">
+    <h2>Todo List</h2>
+    
+    <div class="mb-3">
+        <form id="addTodoForm" class="row g-3">
+            <div class="col-auto">
+                <input type="text" class="form-control" id="todoTitle" placeholder="Enter todo item">
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Add</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="todoList" class="list-group">
+        <!-- Todo items will be dynamically added here -->
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/todo.js"></script>
+}

@@ -1,0 +1,79 @@
+@page "/todo"
+@using WebAspnet.Data
+@using WebAspnet.Models
+@using Microsoft.EntityFrameworkCore
+@inject TodoContext DbContext
+
+<PageTitle>Todo List</PageTitle>
+
+<h3>Todo List</h3>
+
+<div class="row mb-3">
+    <div class="col">
+        <div class="input-group">
+            <input type="text" class="form-control" @bind="newTodoTitle" placeholder="Enter new todo" @onkeyup="@(async e => { if (e.Key == "Enter") await AddTodo(); })" />
+            <button class="btn btn-primary" @onclick="AddTodo">Add</button>
+        </div>
+    </div>
+</div>
+
+<div class="list-group">
+    @foreach (var todo in todos)
+    {
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <input type="checkbox" class="form-check-input me-2" 
+                       checked="@todo.IsCompleted" 
+                       @onchange="async () => await ToggleTodo(todo)" />
+                <span class="@(todo.IsCompleted ? "text-decoration-line-through" : "")">
+                    @todo.Title
+                </span>
+            </div>
+            <button class="btn btn-danger btn-sm" @onclick="async () => await DeleteTodo(todo)">
+                Delete
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private List<WebAspnet.Models.Todo> todos = new();
+    private string newTodoTitle = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTodos();
+    }
+
+    private async Task LoadTodos()
+    {
+        todos = await DbContext.Todos.ToListAsync();
+    }
+
+    private async Task AddTodo()
+    {
+        if (!string.IsNullOrWhiteSpace(newTodoTitle))
+        {
+            var todo = new WebAspnet.Models.Todo { Title = newTodoTitle };
+            DbContext.Todos.Add(todo);
+            await DbContext.SaveChangesAsync();
+            await LoadTodos();
+            newTodoTitle = "";
+        }
+    }
+
+    private async Task ToggleTodo(WebAspnet.Models.Todo todo)
+    {
+        todo.IsCompleted = !todo.IsCompleted;
+        DbContext.Update(todo);
+        await DbContext.SaveChangesAsync();
+        await LoadTodos();
+    }
+
+    private async Task DeleteTodo(WebAspnet.Models.Todo todo)
+    {
+        DbContext.Todos.Remove(todo);
+        await DbContext.SaveChangesAsync();
+        await LoadTodos();
+    }
+}
